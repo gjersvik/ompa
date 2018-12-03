@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Ole Martins Personal Assistant</title>
+</head>
+<body>
+  <h1>Ole Martins Personal Assistant</h1>
+  <ol>
+    {% for action in actions -%}
+    <li>{{action.name}}</li>
+    {%- endfor %}
+  </ol>
+</body>
+</html>
