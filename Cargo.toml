@@ -1,0 +1,6 @@
+[package]
+name = "ompa"
+version = "0.1.0"
+authors = ["Ole Martin Gjersvik <olgj@equinor.com>"]
+
+[dependencies]
