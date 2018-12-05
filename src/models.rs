@@ -8,16 +8,24 @@ pub struct Action{
 #[derive(Serialize)]
 pub enum ActionType{
     Entertainment,
-    Task(Priority),
+    Task (Priority),
 }
 
 #[allow(dead_code)]
 #[derive(Serialize)]
 pub enum Priority{
+    /// If you feel like it no problem
+    JustForFun,
+    /// When you have time and energy to spare
     NiceToHave,
-    AtSomePoint,
+    /// Should be done at some point.
+    Useful,
+    /// Please to as soon as possible. 
     Important,
+    /// If you only can do one task today it should be this.
     VeryImportant,
+    /// Should be next task.
     Critical,
+    /// Must be done NOW!!!
     Mandatory,
 }
