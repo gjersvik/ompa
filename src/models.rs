@@ -1,3 +1,5 @@
+use serde_derive::Serialize;
+
 #[derive(Serialize)]
 pub struct Action{
     pub name: String,

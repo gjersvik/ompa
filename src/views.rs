@@ -1,5 +1,6 @@
-use models::Action;
-use tera::{Context, Tera};
+use crate::models::Action;
+use tera::{Context, Tera, compile_templates};
+use lazy_static::lazy_static;
 
 /// Load in templates from the project template folder.
 lazy_static! {

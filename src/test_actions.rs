@@ -1,6 +1,9 @@
-use models::ActionType;
-use models::Priority;
-use models::Action;
+use crate::models::{
+    ActionType,
+    Priority,
+    Action
+};
+
 
 pub fn test_actions() -> Vec<Action> {
     vec![
@@ -13,6 +16,6 @@ fn test_action(name: &str, action_type: ActionType) -> Action{
     Action {
         name: name.to_string(),
         description: String::new(),
-        action_type: action_type,
+        action_type,
     }
 }

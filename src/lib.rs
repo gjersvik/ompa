@@ -1,15 +1,3 @@
-extern crate gotham;
-extern crate hyper;
-extern crate mime;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate tera;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
-extern crate chrono;
-
 mod housework;
 mod models;
 mod test_actions;
