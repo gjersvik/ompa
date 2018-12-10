@@ -1,7 +1,7 @@
 [package]
 name = "ompa"
 version = "0.1.0"
-authors = ["Ole Martin Gjersvik <olgj@equinor.com>"]
+authors = ["Ole Martin Gjersvik <olem@olem.org>"]
 edition = "2018"
 
 [dependencies]
@@ -9,7 +9,7 @@ gotham = "0.3.0"
 hyper = "0.12"
 mime = "0.3"
 tera = "0.11"
-lazy_static = "1.0"
-serde = "1.0.80"
-serde_derive = "1.0.80"
+lazy_static = "1.2.0"
+serde = "1.0.81"
+serde_derive = "1.0.81"
 chrono = "0.4"

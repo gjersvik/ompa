@@ -8,7 +8,7 @@ lazy_static! {
         compile_templates!(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/*"));
 }
 
-pub fn view_list(list: &Vec<Action>) -> String{
+pub fn view_list(list: &[Action]) -> String{
     let mut context = Context::new();
     context.insert("actions", list);
     TERA.render("index.html", &context).unwrap()

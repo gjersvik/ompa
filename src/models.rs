@@ -13,7 +13,6 @@ pub enum ActionType{
     Task (Priority),
 }
 
-#[allow(dead_code)]
 #[derive(Serialize)]
 pub enum Priority{
     /// If you feel like it no problem

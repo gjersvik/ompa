@@ -1,3 +1,5 @@
+#![deny(clippy::all)]
+
 mod housework;
 mod models;
 mod test_actions;
