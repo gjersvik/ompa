@@ -22,7 +22,7 @@ fn index(_req: &HttpRequest) -> Box<Future<Item=HttpResponse, Error=Error>> {
         .map(|test| {
             HttpResponse::Ok()
             .content_type("text/html")
-            .body(views::view_list(&test))
+            .body(views::view(&test))
         })
         .map_err(|_| {ErrorInternalServerError("Ups")})
         .responder()

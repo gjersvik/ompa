@@ -1,19 +1,14 @@
-use serde_derive::Serialize;
-
-#[derive(Serialize)]
 pub struct Action{
     pub name: String,
     pub description: String,
     pub action_type: ActionType,
 }
 
-#[derive(Serialize)]
 pub enum ActionType{
     Entertainment,
     Task (Priority),
 }
 
-#[derive(Serialize)]
 pub enum Priority{
     /// If you feel like it no problem
     JustForFun,
