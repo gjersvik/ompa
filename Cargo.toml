@@ -5,11 +5,9 @@ authors = ["Ole Martin Gjersvik <olem@olem.org>"]
 edition = "2018"
 
 [dependencies]
-gotham = "0.3.0"
-hyper = "0.12"
-mime = "0.3"
+actix-web = "0.7"
 tera = "0.11"
 lazy_static = "1.2.0"
-serde = "1.0.81"
-serde_derive = "1.0.81"
+serde = "1.0.82"
+serde_derive = "1.0.82"
 chrono = "0.4"
