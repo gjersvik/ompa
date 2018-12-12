@@ -7,17 +7,20 @@ use actix::{
     }
 };
 
+#[derive(Clone)]
 pub struct Action{
+    pub index: usize,
     pub name: String,
-    pub description: String,
     pub action_type: ActionType,
 }
 
+#[derive(Clone)]
 pub enum ActionType{
     Entertainment,
     Task (Priority),
 }
 
+#[derive(Clone)]
 pub enum Priority{
     /// If you feel like it no problem
     JustForFun,
@@ -35,8 +38,21 @@ pub enum Priority{
     Mandatory,
 }
 
+#[derive(Clone)]
 pub struct ActionResult{
     pub actions: Vec<Action>
+}
+
+impl Default for ActionResult {
+    fn default() -> ActionResult {
+        ActionResult{actions: Vec::new()}
+    }
+}
+
+impl From<Vec<Action>> for ActionResult {
+    fn from(actions: Vec<Action>) -> Self {
+        ActionResult{actions}
+    }
 }
 
 impl<A, M> MessageResponse<A, M> for ActionResult
