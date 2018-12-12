@@ -5,7 +5,7 @@ authors = ["Ole Martin Gjersvik <olem@olem.org>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "0.7.15"
+actix-web = "0.7.16"
 actix = "0.7.9"
 futures = "0.1.25"
 tera = "0.11"

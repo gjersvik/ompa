@@ -1,7 +1,60 @@
 use chrono::{Duration, Utc, DateTime};
 use std::collections::HashMap;
+use actix::{
+    Context,
+    Actor,
+    Supervised,
+    SystemService,
+    Handler,
+};
 
-type Chores = HashMap<u64, Chore>;
+use crate::models::{
+    ActionType,
+    Priority,
+    Action,
+    GetActions,
+    ActionResult,
+};
+
+pub struct Chores{
+    chores: HashMap<usize, Chore>,
+}
+
+impl Default for Chores {
+    fn default() -> Chores{
+        Chores{ chores: Default::default()}
+    }
+}
+
+impl Actor for Chores{
+    type Context = Context<Self>;
+
+    fn started(&mut self, _: &mut Context<Self>) {
+        self.chores = get_chores();
+    }
+}
+
+impl Supervised for Chores {}
+
+impl SystemService for Chores {
+   fn service_started(&mut self, _: &mut Context<Self>) {
+   }
+}
+
+impl Handler<GetActions> for Chores {
+   type Result = ActionResult;
+
+    fn handle(&mut self, _: GetActions, _: &mut Context<Self>) -> Self::Result{
+        self.chores.iter().map(|(index, chore)|{
+            Action {
+                index: *index,
+                name: chore.name.clone(),
+                action_type: ActionType::Task( Priority::Important),
+            }
+        }).collect()
+    }
+}
+
 
 pub struct Chore {
     pub name: String,
@@ -36,7 +89,7 @@ impl Chore {
 }
 
 
-fn get_chores() -> Chores {
+fn get_chores() -> HashMap<usize, Chore> {
     let mut chores = HashMap::new();
     chores.insert(100, Chore::daily("Vaske opp"));
     chores.insert(101, Chore::daily("Rydde"));

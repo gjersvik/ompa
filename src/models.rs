@@ -6,6 +6,7 @@ use actix::{
         ResponseChannel,
     }
 };
+use std::iter::FromIterator;
 
 #[derive(Clone)]
 pub struct Action{
@@ -49,9 +50,9 @@ impl Default for ActionResult {
     }
 }
 
-impl From<Vec<Action>> for ActionResult {
-    fn from(actions: Vec<Action>) -> Self {
-        ActionResult{actions}
+impl FromIterator<Action> for ActionResult {
+    fn from_iter<I: IntoIterator<Item=Action>>(iter: I) -> Self {
+        ActionResult{actions: Vec::from_iter(iter)}
     }
 }
 
