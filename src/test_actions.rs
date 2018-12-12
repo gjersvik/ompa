@@ -1,14 +1,10 @@
 use crate::models::{
     ActionType,
     Priority,
-    Action
+    Action,
+    GetActions,
+    ActionResult,
 };
-
-pub struct GetActions;
-
-impl actix::Message for GetActions {
-    type Result = Result<Vec<Action>,()>;
-}
 
 #[derive(Default)]
 pub struct TestActions;
@@ -25,10 +21,10 @@ impl actix::ArbiterService for TestActions {
 }
 
 impl actix::Handler<GetActions> for TestActions {
-   type Result = Result<Vec<Action>,()>;
+   type Result = ActionResult;
 
     fn handle(&mut self, _: GetActions, _: &mut actix::Context<Self>) -> Self::Result{
-        Ok(vec![
+        ActionResult {actions: vec![
             test_action("Play Games", ActionType::Entertainment),
             test_action("Buy new computer", ActionType::Task( Priority::JustForFun)),
             test_action("Print PLA holder", ActionType::Task( Priority::NiceToHave)),
@@ -37,7 +33,7 @@ impl actix::Handler<GetActions> for TestActions {
             test_action("Do dishes", ActionType::Task( Priority::VeryImportant)),
             test_action("Clean cloths", ActionType::Task( Priority::Critical)),
             test_action("Go to airport", ActionType::Task( Priority::Mandatory)),
-        ])
+        ]}
     }
 }
 

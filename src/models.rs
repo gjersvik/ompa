@@ -1,3 +1,12 @@
+use actix::{
+    Actor,
+    Message,
+    dev::{
+        MessageResponse,
+        ResponseChannel,
+    }
+};
+
 pub struct Action{
     pub name: String,
     pub description: String,
@@ -24,4 +33,27 @@ pub enum Priority{
     Critical,
     /// Must be done NOW!!!
     Mandatory,
+}
+
+pub struct ActionResult{
+    pub actions: Vec<Action>
+}
+
+impl<A, M> MessageResponse<A, M> for ActionResult
+where
+    A: Actor,
+    M: Message<Result = ActionResult>,
+{
+    fn handle<R: ResponseChannel<M>>(self, _: &mut A::Context, tx: Option<R>) {
+        if let Some(tx) = tx {
+            tx.send(self);
+        }
+    }
+}
+
+
+pub struct GetActions;
+
+impl Message for GetActions {
+    type Result = ActionResult;
 }

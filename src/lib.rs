@@ -9,20 +9,23 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::AsyncResponder;
 use actix_web::Error;
 use futures::future::Future;
-use crate::test_actions::{GetActions, TestActions} ;
 use actix_web::{server, App, HttpRequest, HttpResponse};
 use actix::Arbiter;
+
+use crate::{
+    models::GetActions,
+    test_actions::TestActions,
+};
 
 fn index(_req: &HttpRequest) -> Box<Future<Item=HttpResponse, Error=Error>> {
     let test = Arbiter::registry().get::<TestActions>();
 
     let res = test.send(GetActions{});
 
-    res.map(|r| {r.unwrap_or_default()})
-        .map(|test| {
+    res.map(|actions| {
             HttpResponse::Ok()
             .content_type("text/html")
-            .body(views::view(&test))
+            .body(views::view(&actions.actions))
         })
         .map_err(|_| {ErrorInternalServerError("Ups")})
         .responder()
