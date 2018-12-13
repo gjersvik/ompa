@@ -1,28 +1,19 @@
+use crate::ole_martin::{
+    OleMartin,
+    UpdateActions,
+    Action,
+    ActionType,
+    Priority,
+};
 use actix::{
     Context,
     Actor,
-    Supervised,
-    ArbiterService,
-    Handler,
+    System
 };
+use futures::future::Future;
 
-use crate::models::{
-    ActionType,
-    Priority,
-    Action,
-    GetActions,
-    ActionResult,
-};
-
-pub struct TestActions{
-    result: ActionResult,
-}
-
-impl Default for TestActions {
-    fn default() -> TestActions{
-        TestActions{ result: Default::default()}
-    }
-}
+#[derive(Default)]
+pub struct TestActions;
 
 impl Actor for TestActions {
     type Context = Context<Self>;
@@ -39,27 +30,15 @@ impl Actor for TestActions {
             ("Go to airport", ActionType::Task( Priority::Mandatory)),
         ];
 
-        self.result.actions = actions.iter().enumerate().map(|(index,(name, action_type))|{
+        let actions = actions.iter().enumerate().map(|(index,(name, action_type))|{
             Action {
                 index,
                 name: name.to_string(),
                 action_type: action_type.clone(),
             }
         }).collect();
-    }
-}
 
-impl Supervised for TestActions {}
-
-impl ArbiterService for TestActions {
-   fn service_started(&mut self, _: &mut Context<Self>) {
-   }
-}
-
-impl Handler<GetActions> for TestActions {
-   type Result = ActionResult;
-
-    fn handle(&mut self, _: GetActions, _: &mut Context<Self>) -> Self::Result{
-        self.result.clone()
+        let task = System::current().registry().get::<OleMartin>().send(UpdateActions{name: "test".to_string(), actions: actions});
+        actix::spawn(task.map(|_|{}).map_err(|_|{}));
     }
 }

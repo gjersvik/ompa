@@ -3,27 +3,21 @@ use std::collections::HashMap;
 use actix::{
     Context,
     Actor,
-    Supervised,
-    SystemService,
-    Handler,
+    System
 };
+use futures::future::Future;
 
-use crate::models::{
+use crate::ole_martin::{
     ActionType,
     Priority,
     Action,
-    GetActions,
-    ActionResult,
+    OleMartin,
+    UpdateActions,
 };
 
+#[derive(Default)]
 pub struct Chores{
     chores: HashMap<usize, Chore>,
-}
-
-impl Default for Chores {
-    fn default() -> Chores{
-        Chores{ chores: Default::default()}
-    }
 }
 
 impl Actor for Chores{
@@ -31,30 +25,19 @@ impl Actor for Chores{
 
     fn started(&mut self, _: &mut Context<Self>) {
         self.chores = get_chores();
-    }
-}
 
-impl Supervised for Chores {}
-
-impl SystemService for Chores {
-   fn service_started(&mut self, _: &mut Context<Self>) {
-   }
-}
-
-impl Handler<GetActions> for Chores {
-   type Result = ActionResult;
-
-    fn handle(&mut self, _: GetActions, _: &mut Context<Self>) -> Self::Result{
-        self.chores.iter().map(|(index, chore)|{
+        let actions = self.chores.iter().map(|(index, chore)|{
             Action {
                 index: *index,
                 name: chore.name.clone(),
                 action_type: ActionType::Task( Priority::Important),
             }
-        }).collect()
+        }).collect();
+
+        let task = System::current().registry().get::<OleMartin>().send(UpdateActions{name: "chores".to_string(), actions: actions});
+        actix::spawn(task.map(|_|{}).map_err(|_|{}));
     }
 }
-
 
 pub struct Chore {
     pub name: String,
