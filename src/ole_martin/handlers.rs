@@ -5,6 +5,7 @@ use actix_web::{
     error::ErrorInternalServerError,
     AsyncResponder,
     Error,
+    http::header,
 };
 use futures::future::Future;
 use super::{sorter::Sorter,messages::GetActions};
@@ -21,6 +22,18 @@ fn index(_req: &HttpRequest) -> Box<Future<Item=HttpResponse, Error=Error>> {
     .responder()
 }
 
+fn start(_req: &HttpRequest) -> HttpResponse{
+    HttpResponse::PermanentRedirect().header(header::LOCATION, "/").finish()
+}
+
+fn stop(_req: &HttpRequest) -> HttpResponse{
+    HttpResponse::PermanentRedirect().header(header::LOCATION, "/").finish()
+}
+
 pub fn app() -> App<()>{
-    App::new().resource("/", |r| r.f(index))
+    App::new()
+        .resource("/", |r| r.f(index))
+        .resource("/start", |r| r.f(start))
+        .resource("/stop", |r| r.f(stop))
+
 }
