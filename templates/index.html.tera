@@ -3,13 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <title>Ole Martins Personal Assistant</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .entertainment{
+      background-color: #2196f3;
+      color: #000000;
+    }
+    .fun{
+      background-color: #c5e1a5;
+      color: #000000;
+    }
+    .nice{
+      background-color: #388e3c;
+      color: #000000;
+    }
+    .useful{
+      background-color: #fff59d;
+      color: #000000;
+    }
+    .important{
+      background-color: #ffeb3b;
+      color: #000000;
+    }
+    .very-important{
+      background-color: #f9a825;
+      color: #000000;
+    }
+    .critical{
+      background-color: #f44336;
+      color: #000000;
+    }
+    .mandatory{
+      background-color: #b71c1c;
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ole Martins Personal Assistant</h1>
-  <ol>
-    {% for action in actions -%}
-    <li>{{action.name}} is {{action.type}}</li>
-    {%- endfor %}
-  </ol>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header mdl-layout--no-drawer-button">
+      <div class="mdl-layout__header-row">
+        <span class="mdl-layout__title">Ole Martins Personal Assistant</span>
+      </div>
+    </header>
+    <main class="mdl-layout__content">
+      {%if active %}
+      <div class="mdl-card mdl-shadow--4dp">
+        <div class="mdl-card__title {{actions.0.css}}">
+          <h2 class="mdl-card__title-text mdl-card--expand">{{actions.0.name}}</h2>
+        </div>
+        <form class="mdl-card__actions mdl-card--border" action="stop" method="post">
+          <button type="submit" id="done" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Done</button>
+          <button type="submit" id="cancel" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
+        </form>
+      </div>
+      {% endif %}
+      <ul class="mdl-list">
+        {% for action in actions -%}
+        <li class="mdl-list__item {{action.css}}">
+          <span class="mdl-list__item-primary-content">{{action.name}}</span>
+          
+          <form class="mdl-list__item-secondary-content" action="start" method="post">
+            <input type="hidden" id="id" value="{{action.id}}"/>
+            <input type="hidden" id="source" value="{{action.source}}"/>
+            <button type="submit" class="mdl-list__item-secondary-action mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" href="#">Start</button>
+          </form>
+        </li>
+        {%- endfor %}
+      </ul>
+    </main>
+  </div>
 </body>
 </html>

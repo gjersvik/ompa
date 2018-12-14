@@ -25,7 +25,10 @@ fn get_context(list: &[InternalAction]) -> Context{
 fn action_context(action:&InternalAction) -> Context{
     let mut context = Context::new();
     context.insert("name", &action.name);
+    context.insert("source", &action.source);
+    context.insert("id", &action.index);
     context.insert("type", print_action_type(&action.action_type));
+    context.insert("css", print_css_class(&action.action_type) );
     context
 }
 
@@ -39,5 +42,18 @@ fn print_action_type(action: &ActionType) -> &'static str{
         ActionType::Task(Priority::VeryImportant) => "very important task",
         ActionType::Task(Priority::Critical) => "critical task",
         ActionType::Task(Priority::Mandatory) => "mandatory task",
+    }
+}
+
+fn print_css_class(action: &ActionType) -> &'static str{
+    match action {
+        ActionType::Entertainment => "entertainment",
+        ActionType::Task(Priority::JustForFun) => "fun",
+        ActionType::Task(Priority::NiceToHave) => "nice",
+        ActionType::Task(Priority::Useful) => "useful",
+        ActionType::Task(Priority::Important) => "important",
+        ActionType::Task(Priority::VeryImportant) => "very-important",
+        ActionType::Task(Priority::Critical) => "critical",
+        ActionType::Task(Priority::Mandatory) => "mandatory",
     }
 }

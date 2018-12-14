@@ -5,7 +5,9 @@
         "chrono",
         "clippy",
         "concat",
+        "endfor",
         "ompa",
-        "serde"
+        "serde",
+        "stylesheet"
     ]
 }
