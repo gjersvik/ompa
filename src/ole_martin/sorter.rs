@@ -14,7 +14,7 @@ use std::{
 use super::{
     Action,
     UpdateActions,
-    messages::{GetActions, ActionResult},
+    messages::{GetActions, Actions, InternalAction},
 };
 
 #[derive(Default)]
@@ -51,10 +51,15 @@ impl Handler<UpdateActions> for Sorter {
 }
 
 impl Handler<GetActions> for Sorter {
-    type Result = ActionResult;
+    type Result = Actions;
 
     fn handle(&mut self, _: GetActions, _: &mut Self::Context) -> Self::Result {
-        let actions = self.sources.iter().flat_map(|(_, source)| source).cloned().collect();
-        ActionResult{actions}
+        let actions = self.sources.iter().flat_map(to_internal).collect();
+        Actions(actions)
     }
+}
+
+fn to_internal(kv:(&String, &Vec<Action>)) -> Vec<InternalAction>{
+    let (name, actions) = kv;
+    actions.iter().map(|a| InternalAction::new(a.clone(), name.clone())).collect()
 }

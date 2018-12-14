@@ -1,4 +1,4 @@
-use super::{Action, ActionType, Priority};
+use super::messages::{InternalAction, ActionType, Priority};
 use tera::{Context, Tera, compile_templates};
 use lazy_static::lazy_static;
 
@@ -10,19 +10,19 @@ lazy_static! {
     };
 }
 
-pub fn view(list: &[Action]) -> String{
+pub fn view(list: &[InternalAction]) -> String{
     let context = get_context(list);
     TERA.render("index.html.tera", &context).unwrap()
 }
 
-fn get_context(list: &[Action]) -> Context{
+fn get_context(list: &[InternalAction]) -> Context{
     let actions:Vec<Context> = list.iter().map(action_context).collect();
     let mut context = Context::new();
     context.insert("actions", &actions);
     context
 }
 
-fn action_context(action:&Action) -> Context{
+fn action_context(action:&InternalAction) -> Context{
     let mut context = Context::new();
     context.insert("name", &action.name);
     context.insert("type", print_action_type(&action.action_type));

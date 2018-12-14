@@ -6,9 +6,6 @@ use actix::{
         ResponseChannel,
     }
 };
-use std::{
-    iter::FromIterator,
-};
 
 #[derive(Message)]
 pub struct UpdateActions{
@@ -47,27 +44,13 @@ pub enum Priority{
     Mandatory,
 }
 
-#[derive(Clone)]
-pub struct ActionResult{
-    pub actions: Vec<Action>
-}
+#[derive(Clone, Default)]
+pub struct Actions(pub Vec<InternalAction>);
 
-impl Default for ActionResult {
-    fn default() -> ActionResult {
-        ActionResult{actions: Vec::new()}
-    }
-}
-
-impl FromIterator<Action> for ActionResult {
-    fn from_iter<I: IntoIterator<Item=Action>>(iter: I) -> Self {
-        ActionResult{actions: Vec::from_iter(iter)}
-    }
-}
-
-impl<A, M> MessageResponse<A, M> for ActionResult
+impl<A, M> MessageResponse<A, M> for Actions
 where
     A: Actor,
-    M: Message<Result = ActionResult>,
+    M: Message<Result = Actions>,
 {
     fn handle<R: ResponseChannel<M>>(self, _: &mut A::Context, tx: Option<R>) {
         if let Some(tx) = tx {
@@ -79,5 +62,24 @@ where
 pub struct GetActions;
 
 impl Message for GetActions {
-    type Result = ActionResult;
+    type Result = Actions;
+}
+
+#[derive(Clone)]
+pub struct InternalAction {
+    pub index: usize,
+    pub name: String,
+    pub action_type: ActionType,
+    pub source: String,
+}
+
+impl InternalAction{
+    pub fn new(action: Action, source: String) -> InternalAction{
+        InternalAction{
+            source,
+            index: action.index,
+            name: action.name,
+            action_type: action.action_type,
+        }
+    }
 }
