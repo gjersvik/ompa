@@ -8,9 +8,7 @@ use crate::ole_martin::{
 use actix::{
     Context,
     Actor,
-    System
 };
-use futures::future::Future;
 
 #[derive(Default)]
 pub struct TestActions;
@@ -38,7 +36,6 @@ impl Actor for TestActions {
             }
         }).collect();
 
-        let task = System::current().registry().get::<OleMartin>().send(UpdateActions{name: "test".to_string(), actions: actions});
-        actix::spawn(task.map(|_|{}).map_err(|_|{}));
+        OleMartin::addr().do_send(UpdateActions{name: "test".to_string(), actions: actions});
     }
 }

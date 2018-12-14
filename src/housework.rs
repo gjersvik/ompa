@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use actix::{
     Context,
     Actor,
-    System
 };
-use futures::future::Future;
 
 use crate::ole_martin::{
     ActionType,
@@ -34,8 +32,7 @@ impl Actor for Chores{
             }
         }).collect();
 
-        let task = System::current().registry().get::<OleMartin>().send(UpdateActions{name: "chores".to_string(), actions: actions});
-        actix::spawn(task.map(|_|{}).map_err(|_|{}));
+        OleMartin::addr().do_send(UpdateActions{name: "chores".to_string(), actions: actions});
     }
 }
 

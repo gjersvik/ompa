@@ -3,6 +3,7 @@ mod views;
 use actix::{
     Context,
     Actor,
+    Addr,
     Supervised,
     SystemService,
     Handler,
@@ -14,7 +15,6 @@ use actix::{
     }
 };
 use actix_web::{
-    server,
     App,
     HttpRequest,
     HttpResponse,
@@ -33,15 +33,19 @@ pub struct OleMartin{
     sources: HashMap<String, Vec<Action>>,
 }
 
+impl OleMartin {
+    pub fn app() -> App<()>{
+        App::new().resource("/", |r| r.f(index))
+    }
+    pub fn addr() -> Addr<OleMartin> {
+        System::current().registry().get::<OleMartin>()
+    }
+}
+
 impl Actor for OleMartin{
     type Context = Context<Self>;
 
     fn started(&mut self, _: &mut Context<Self>) {
-        let server = server::new(|| App::new().resource("/", |r| r.f(index)));
-        let addr = "127.0.0.1:7878";
-        println!("Listening for requests at http://{}", addr);
-        let server = server.bind(addr).unwrap();
-        server.start();
     }
 }
 
