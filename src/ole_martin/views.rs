@@ -10,8 +10,11 @@ lazy_static! {
     };
 }
 
-pub fn view(list: &[InternalAction]) -> String{
-    let context = get_context(list);
+pub fn view(list: &[InternalAction], op: Option<InternalAction>) -> String{
+    let mut context = get_context(list);
+    if let Some(op) = op {
+        context.insert("active", &action_context(&op));
+    }
     TERA.render("index.html.tera", &context).unwrap()
 }
 

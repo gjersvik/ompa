@@ -6,6 +6,7 @@ use actix::{
         ResponseChannel,
     }
 };
+use chrono::{DateTime, Utc};
 
 #[derive(Message)]
 pub struct UpdateActions{
@@ -59,6 +60,13 @@ where
     }
 }
 
+pub struct GetAction(pub String, pub usize);
+
+impl Message for GetAction {
+    type Result = Option<InternalAction>;
+}
+
+
 pub struct GetActions;
 
 impl Message for GetActions {
@@ -82,4 +90,22 @@ impl InternalAction{
             action_type: action.action_type,
         }
     }
+}
+
+#[derive(Message)]
+pub struct StartAction{
+    pub action: InternalAction,
+    pub time: DateTime<Utc>,
+}
+
+#[derive(Message)]
+pub struct Done(pub DateTime<Utc>);
+
+#[derive(Message)]
+pub struct Cancel; 
+
+pub struct GetActive;
+
+impl Message for GetActive {
+    type Result = Option<InternalAction>;
 }

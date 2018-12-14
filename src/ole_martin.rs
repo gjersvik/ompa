@@ -1,6 +1,7 @@
 mod handlers;
 mod messages;
 mod sorter;
+mod tracker;
 mod views;
 
 use actix::{

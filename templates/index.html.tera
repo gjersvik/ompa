@@ -53,12 +53,12 @@
     <main class="mdl-layout__content">
       {%if active %}
       <div class="mdl-card mdl-shadow--4dp">
-        <div class="mdl-card__title {{actions.0.css}}">
-          <h2 class="mdl-card__title-text mdl-card--expand">{{actions.0.name}}</h2>
+        <div class="mdl-card__title {{active.css}}">
+          <h2 class="mdl-card__title-text mdl-card--expand">{{active.name}}</h2>
         </div>
         <form class="mdl-card__actions mdl-card--border" action="stop" method="post">
-          <button type="submit" id="done" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Done</button>
-          <button type="submit" id="cancel" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
+          <button type="submit" name="done" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Done</button>
+          <button type="submit" name="cancel" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
         </form>
       </div>
       {% endif %}
@@ -68,8 +68,8 @@
           <span class="mdl-list__item-primary-content">{{action.name}}</span>
           
           <form class="mdl-list__item-secondary-content" action="start" method="post">
-            <input type="hidden" id="id" value="{{action.id}}"/>
-            <input type="hidden" id="source" value="{{action.source}}"/>
+            <input type="hidden" name="id" value="{{action.id}}"/>
+            <input type="hidden" name="source" value="{{action.source}}"/>
             <button type="submit" class="mdl-list__item-secondary-action mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" href="#">Start</button>
           </form>
         </li>
