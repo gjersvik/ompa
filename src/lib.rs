@@ -1,6 +1,7 @@
 #![deny(clippy::all)]
 
 mod housework;
+mod logger;
 mod ole_martin;
 mod test_actions;
 
@@ -11,6 +12,7 @@ use crate::{
     test_actions::TestActions,
     housework::Chores,
     ole_martin::OleMartin,
+    logger::Logger,
 };
 
 /// Start a server and call the `Handler` we've defined above for each `Request` we receive.
@@ -19,6 +21,7 @@ pub fn start() {
 
     let _test = TestActions::start_default();
     let _chore = Chores::start_default();
+    let _log = Logger::addr();
 
     let server = server::new(OleMartin::app);
     let addr = "127.0.0.1:7878";

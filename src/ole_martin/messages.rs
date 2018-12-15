@@ -1,6 +1,7 @@
 use actix::{
     Actor,
     Message,
+    Recipient,
     dev::{
         MessageResponse,
         ResponseChannel,
@@ -12,6 +13,17 @@ use chrono::{DateTime, Utc};
 pub struct UpdateActions{
     pub name: String,
     pub actions: Vec<Action>
+}
+
+#[derive(Message)]
+pub struct CompletedSub(pub Recipient<Completed>, pub Option<String>);
+
+#[derive(Message, Clone)]
+pub struct Completed{
+    pub started: DateTime<Utc>,
+    pub completed: DateTime<Utc>,
+    pub source: String,
+    pub action: Action,
 }
 
 #[derive(Clone)]
@@ -89,6 +101,14 @@ impl InternalAction{
             name: action.name,
             action_type: action.action_type,
         }
+    }
+
+    pub fn unpack(self) -> (Action, String){
+        (Action {
+            index: self.index,
+            name: self.name,
+            action_type: self.action_type,
+        }, self.source)
     }
 }
 

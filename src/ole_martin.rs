@@ -1,5 +1,6 @@
 mod handlers;
 mod messages;
+mod notifier;
 mod sorter;
 mod tracker;
 mod views;
@@ -14,9 +15,10 @@ use actix_web::App;
 
 use self::{
     sorter::Sorter,
+    notifier::Notifier,
 };
 
-pub use self::messages::{Action, UpdateActions, ActionType, Priority};
+pub use self::messages::{Action, UpdateActions, ActionType, Priority, CompletedSub, Completed};
 
 #[derive(Default)]
 pub struct OleMartin;
@@ -39,5 +41,13 @@ impl Handler<UpdateActions> for OleMartin {
 
     fn handle(&mut self, msg: UpdateActions, _: &mut Self::Context) {
         Sorter::addr().do_send(msg);
+    }
+}
+
+impl Handler<CompletedSub> for OleMartin {
+    type Result = ();
+
+    fn handle(&mut self, msg: CompletedSub, _: &mut Self::Context) {
+        Notifier::addr().do_send(msg);
     }
 }

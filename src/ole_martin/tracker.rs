@@ -10,7 +10,8 @@ use actix::{
 use chrono::{DateTime, Utc};
 
 use super::{
-    messages::{InternalAction, StartAction, Done, Cancel, GetActive},
+    notifier::Notifier,
+    messages::{InternalAction, StartAction, Done, Cancel, GetActive, Completed},
 };
 
 pub struct Tracker{
@@ -50,10 +51,15 @@ impl Handler<StartAction> for Tracker {
 impl Handler<Done> for Tracker {
     type Result = ();
 
-    fn handle(&mut self, _: Done, _: &mut Self::Context) {
-        if let Some(active) = &self.active {
-            println!("{} is done", active.name);
-            self.active = None;
+    fn handle(&mut self, msg: Done, _: &mut Self::Context) {
+        if let Some(active) = self.active.take() {
+            let (action,source) = active.unpack();
+            Notifier::addr().do_send(Completed {
+                action,
+                source,
+                started: self.start_time,
+                completed: msg.0,
+            });
         }
     }
 }
