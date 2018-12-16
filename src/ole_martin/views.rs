@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 /// Load in templates from the project template folder.
 lazy_static! {
     static ref TERA: Tera = {
-        let tera = compile_templates!(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/*"));
+        let tera = compile_templates!("templates/**/*");
         tera
     };
 }
