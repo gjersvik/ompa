@@ -6,7 +6,10 @@
         "chrono",
         "clippy",
         "concat",
+        "dotenv",
         "endfor",
+        "httpauth",
+        "olem",
         "ompa",
         "serde",
         "stylesheet"
