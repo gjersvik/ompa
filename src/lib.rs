@@ -53,6 +53,7 @@ impl<S> Middleware<S> for Auth {
 pub struct Config{
     pub bind_port: String,
     pub web_password: String,
+    pub postgresql_uri: String,
 }
 
 pub fn start(config: Config) {

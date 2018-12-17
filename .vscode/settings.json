@@ -11,6 +11,7 @@
         "httpauth",
         "olem",
         "ompa",
+        "postgresql",
         "serde",
         "stylesheet"
     ]
