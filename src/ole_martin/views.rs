@@ -1,6 +1,6 @@
-use super::messages::{InternalAction, ActionType, Priority};
-use tera::{Context, Tera, compile_templates};
+use super::messages::{ActionType, InternalAction, Priority};
 use lazy_static::lazy_static;
+use tera::{compile_templates, Context, Tera};
 
 /// Load in templates from the project template folder.
 lazy_static! {
@@ -10,7 +10,7 @@ lazy_static! {
     };
 }
 
-pub fn view(list: &[InternalAction], op: Option<InternalAction>) -> String{
+pub fn view(list: &[InternalAction], op: Option<InternalAction>) -> String {
     let mut context = get_context(list);
     if let Some(op) = op {
         context.insert("active", &action_context(&op));
@@ -18,24 +18,24 @@ pub fn view(list: &[InternalAction], op: Option<InternalAction>) -> String{
     TERA.render("index.html.tera", &context).unwrap()
 }
 
-fn get_context(list: &[InternalAction]) -> Context{
-    let actions:Vec<Context> = list.iter().map(action_context).collect();
+fn get_context(list: &[InternalAction]) -> Context {
+    let actions: Vec<Context> = list.iter().map(action_context).collect();
     let mut context = Context::new();
     context.insert("actions", &actions);
     context
 }
 
-fn action_context(action:&InternalAction) -> Context{
+fn action_context(action: &InternalAction) -> Context {
     let mut context = Context::new();
     context.insert("name", &action.name);
     context.insert("source", &action.source);
     context.insert("id", &action.index);
     context.insert("type", print_action_type(&action.action_type));
-    context.insert("css", print_css_class(&action.action_type) );
+    context.insert("css", print_css_class(&action.action_type));
     context
 }
 
-fn print_action_type(action: &ActionType) -> &'static str{
+fn print_action_type(action: &ActionType) -> &'static str {
     match action {
         ActionType::Entertainment => "entertainment",
         ActionType::Task(Priority::JustForFun) => "just for fun task",
@@ -48,7 +48,7 @@ fn print_action_type(action: &ActionType) -> &'static str{
     }
 }
 
-fn print_css_class(action: &ActionType) -> &'static str{
+fn print_css_class(action: &ActionType) -> &'static str {
     match action {
         ActionType::Entertainment => "entertainment",
         ActionType::Task(Priority::JustForFun) => "fun",

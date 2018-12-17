@@ -7,32 +7,24 @@ mod test_actions;
 
 use actix::{Actor, System};
 use actix_web::{
-    server,
-    Result,
-    HttpRequest,
-    FromRequest,
     middleware::{Middleware, Started},
+    server, FromRequest, HttpRequest, Result,
 };
 use actix_web_httpauth::extractors::{
-    AuthenticationError,
     basic::{BasicAuth, Config as AuthConfig},
+    AuthenticationError,
 };
 
-use crate::{
-    test_actions::TestActions,
-    housework::Chores,
-    ole_martin::OleMartin,
-    logger::Logger,
-};
+use crate::{housework::Chores, logger::Logger, ole_martin::OleMartin, test_actions::TestActions};
 
 #[derive(Clone)]
-struct Auth{
+struct Auth {
     password: String,
 }
 
 impl Auth {
-    fn new(password: String) -> Auth{
-        Auth {password}
+    fn new(password: String) -> Auth {
+        Auth { password }
     }
 }
 
@@ -50,7 +42,7 @@ impl<S> Middleware<S> for Auth {
     }
 }
 
-pub struct Config{
+pub struct Config {
     pub bind_port: String,
     pub web_password: String,
     pub postgresql_uri: String,
@@ -65,9 +57,7 @@ pub fn start(config: Config) {
 
     let auth = Auth::new(config.web_password);
 
-    let server = server::new(move || {
-        OleMartin::app().middleware(auth.clone())
-    });
+    let server = server::new(move || OleMartin::app().middleware(auth.clone()));
     let addr = "0.0.0.0:".to_string() + &config.bind_port;
     println!("Listening for requests at http://{}", addr);
     let server = server.bind(addr).unwrap();

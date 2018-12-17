@@ -1,27 +1,22 @@
-use actix::{
-    Context,
-    Actor,
-    Addr,
-    Supervised,
-    SystemService,
-    Handler,
-    System,
-};
+use actix::{Actor, Addr, Context, Handler, Supervised, System, SystemService};
 use chrono::{DateTime, Utc};
 
 use super::{
+    messages::{Cancel, Completed, Done, GetActive, InternalAction, StartAction},
     notifier::Notifier,
-    messages::{InternalAction, StartAction, Done, Cancel, GetActive, Completed},
 };
 
-pub struct Tracker{
+pub struct Tracker {
     active: Option<InternalAction>,
-    start_time: DateTime<Utc>
+    start_time: DateTime<Utc>,
 }
 
 impl Default for Tracker {
     fn default() -> Tracker {
-        Tracker{ active: None, start_time: Utc::now()}
+        Tracker {
+            active: None,
+            start_time: Utc::now(),
+        }
     }
 }
 
@@ -31,7 +26,7 @@ impl Tracker {
     }
 }
 
-impl Actor for Tracker{
+impl Actor for Tracker {
     type Context = Context<Self>;
 }
 
@@ -53,7 +48,7 @@ impl Handler<Done> for Tracker {
 
     fn handle(&mut self, msg: Done, _: &mut Self::Context) {
         if let Some(active) = self.active.take() {
-            let (action,source) = active.unpack();
+            let (action, source) = active.unpack();
             Notifier::addr().do_send(Completed {
                 action,
                 source,

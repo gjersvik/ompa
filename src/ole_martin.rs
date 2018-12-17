@@ -5,26 +5,18 @@ mod sorter;
 mod tracker;
 mod views;
 
-use actix::{
-    Context,
-    Actor,
-    Addr,
-    Handler,
-};
+use actix::{Actor, Addr, Context, Handler};
 use actix_web::App;
 
-use self::{
-    sorter::Sorter,
-    notifier::Notifier,
-};
+use self::{notifier::Notifier, sorter::Sorter};
 
-pub use self::messages::{Action, UpdateActions, ActionType, Priority, CompletedSub, Completed};
+pub use self::messages::{Action, ActionType, Completed, CompletedSub, Priority, UpdateActions};
 
 #[derive(Default)]
 pub struct OleMartin;
 
 impl OleMartin {
-    pub fn app() -> App<()>{
+    pub fn app() -> App<()> {
         handlers::app()
     }
     pub fn addr() -> Addr<OleMartin> {
@@ -32,7 +24,7 @@ impl OleMartin {
     }
 }
 
-impl Actor for OleMartin{
+impl Actor for OleMartin {
     type Context = Context<Self>;
 }
 

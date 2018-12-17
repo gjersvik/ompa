@@ -1,38 +1,34 @@
-use chrono::{Duration, Utc, DateTime};
+use actix::{Actor, Context};
+use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
-use actix::{
-    Context,
-    Actor,
-};
 
-use crate::ole_martin::{
-    ActionType,
-    Priority,
-    Action,
-    OleMartin,
-    UpdateActions,
-};
+use crate::ole_martin::{Action, ActionType, OleMartin, Priority, UpdateActions};
 
 #[derive(Default)]
-pub struct Chores{
+pub struct Chores {
     chores: HashMap<usize, Chore>,
 }
 
-impl Actor for Chores{
+impl Actor for Chores {
     type Context = Context<Self>;
 
     fn started(&mut self, _: &mut Context<Self>) {
         self.chores = get_chores();
 
-        let actions = self.chores.iter().map(|(index, chore)|{
-            Action {
+        let actions = self
+            .chores
+            .iter()
+            .map(|(index, chore)| Action {
                 index: *index,
                 name: chore.name.clone(),
-                action_type: ActionType::Task( Priority::Important),
-            }
-        }).collect();
+                action_type: ActionType::Task(Priority::Important),
+            })
+            .collect();
 
-        OleMartin::addr().do_send(UpdateActions{name: "chores".to_string(), actions: actions});
+        OleMartin::addr().do_send(UpdateActions {
+            name: "chores".to_string(),
+            actions: actions,
+        });
     }
 }
 
@@ -43,8 +39,12 @@ pub struct Chore {
 }
 
 impl Chore {
-    fn new(name: &str, duration: Duration) -> Chore{
-        Chore {name: name.to_string(), frequency: duration, last_done: None}
+    fn new(name: &str, duration: Duration) -> Chore {
+        Chore {
+            name: name.to_string(),
+            frequency: duration,
+            last_done: None,
+        }
     }
 
     fn daily(name: &str) -> Chore {
@@ -67,7 +67,6 @@ impl Chore {
         Chore::new(name, Duration::days(365))
     }
 }
-
 
 fn get_chores() -> HashMap<usize, Chore> {
     let mut chores = HashMap::new();

@@ -1,21 +1,10 @@
-use actix::{
-    Context,
-    Actor,
-    Addr,
-    Supervised,
-    SystemService,
-    Handler,
-    System,
-    Recipient,
-};
+use actix::{Actor, Addr, Context, Handler, Recipient, Supervised, System, SystemService};
 use std::collections::HashMap;
 
-use super::{
-    messages::{CompletedSub, Completed},
-};
+use super::messages::{Completed, CompletedSub};
 
 #[derive(Default)]
-pub struct Notifier{
+pub struct Notifier {
     topics: HashMap<String, Vec<Recipient<Completed>>>,
     all: Vec<Recipient<Completed>>,
 }
@@ -26,7 +15,7 @@ impl Notifier {
     }
 }
 
-impl Actor for Notifier{
+impl Actor for Notifier {
     type Context = Context<Self>;
 }
 
@@ -41,9 +30,11 @@ impl Handler<CompletedSub> for Notifier {
         match msg.1 {
             Some(key) => match self.topics.get_mut(&key) {
                 Some(list) => list.push(msg.0),
-                None => {self.topics.insert(key, vec![msg.0]);}
+                None => {
+                    self.topics.insert(key, vec![msg.0]);
+                }
             },
-            None => self.all.push(msg.0)
+            None => self.all.push(msg.0),
         }
     }
 }

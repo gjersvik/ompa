@@ -1,13 +1,4 @@
-use actix::{
-    Context,
-    Actor,
-    Addr,
-    Supervised,
-    SystemService,
-    Handler,
-    System,
-    AsyncContext,
-};
+use actix::{Actor, Addr, AsyncContext, Context, Handler, Supervised, System, SystemService};
 
 use super::ole_martin::{Completed, CompletedSub, OleMartin};
 
@@ -16,15 +7,15 @@ pub struct Logger;
 
 impl Logger {
     pub fn addr() -> Addr<Logger> {
-         System::current().registry().get::<Logger>()
+        System::current().registry().get::<Logger>()
     }
 }
 
-impl Actor for Logger{
+impl Actor for Logger {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Context<Self>) {
-         OleMartin::addr().do_send(CompletedSub(ctx.address().recipient(),None));
+        OleMartin::addr().do_send(CompletedSub(ctx.address().recipient(), None));
     }
 }
 

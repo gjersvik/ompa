@@ -1,24 +1,13 @@
-use actix::{
-    Context,
-    Actor,
-    Addr,
-    Supervised,
-    SystemService,
-    Handler,
-    System,
-};
-use std::{
-    collections::HashMap,
-};
+use actix::{Actor, Addr, Context, Handler, Supervised, System, SystemService};
+use std::collections::HashMap;
 
 use super::{
-    Action,
-    UpdateActions,
-    messages::{GetActions,GetAction, Actions, InternalAction},
+    messages::{Actions, GetAction, GetActions, InternalAction},
+    Action, UpdateActions,
 };
 
 #[derive(Default)]
-pub struct Sorter{
+pub struct Sorter {
     sources: HashMap<String, Vec<Action>>,
 }
 
@@ -28,18 +17,16 @@ impl Sorter {
     }
 }
 
-impl Actor for Sorter{
+impl Actor for Sorter {
     type Context = Context<Self>;
 
-    fn started(&mut self, _: &mut Context<Self>) {
-    }
+    fn started(&mut self, _: &mut Context<Self>) {}
 }
 
 impl Supervised for Sorter {}
 
 impl SystemService for Sorter {
-   fn service_started(&mut self, _: &mut Context<Self>) {
-   }
+    fn service_started(&mut self, _: &mut Context<Self>) {}
 }
 
 impl Handler<UpdateActions> for Sorter {
@@ -70,7 +57,10 @@ impl Handler<GetAction> for Sorter {
     }
 }
 
-fn to_internal(kv:(&String, &Vec<Action>)) -> Vec<InternalAction>{
+fn to_internal(kv: (&String, &Vec<Action>)) -> Vec<InternalAction> {
     let (name, actions) = kv;
-    actions.iter().map(|a| InternalAction::new(a.clone(), name.clone())).collect()
+    actions
+        .iter()
+        .map(|a| InternalAction::new(a.clone(), name.clone()))
+        .collect()
 }
