@@ -3,6 +3,7 @@
 mod housework;
 mod logger;
 mod ole_martin;
+mod postgresql;
 mod test_actions;
 
 use actix::{Actor, System};
@@ -50,6 +51,8 @@ pub struct Config {
 
 pub fn start(config: Config) {
     let sys = System::new("ompa");
+
+    //postgresql::test(config.postgresql_uri);
 
     let _test = TestActions::start_default();
     let _chore = Chores::start_default();
