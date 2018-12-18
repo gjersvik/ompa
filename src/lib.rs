@@ -52,7 +52,7 @@ pub struct Config {
 pub fn start(config: Config) {
     let sys = System::new("ompa");
 
-    //postgresql::test(config.postgresql_uri);
+    postgresql::test(config.postgresql_uri);
 
     let _test = TestActions::start_default();
     let _chore = Chores::start_default();
