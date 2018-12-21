@@ -33,3 +33,6 @@ pub struct LoadChores;
 impl Message for LoadChores {
     type Result = Chores;
 }
+
+#[derive(Message)]
+pub struct UpdateTime(pub i32, pub DateTime<Utc>);

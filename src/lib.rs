@@ -3,7 +3,6 @@
 mod chores;
 mod logger;
 mod ole_martin;
-mod test_actions;
 
 use actix::{Actor, System};
 use actix_web::{
@@ -15,7 +14,7 @@ use actix_web_httpauth::extractors::{
     AuthenticationError,
 };
 
-use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin, test_actions::TestActions};
+use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin};
 
 #[derive(Clone)]
 struct Auth {
@@ -51,7 +50,6 @@ pub struct Config {
 pub fn start(config: Config) {
     let sys = System::new("ompa");
 
-    let _test = TestActions::start_default();
     let _chore = Chores::new(
         config.postgresql_uri,
         OleMartin::addr().recipient(),

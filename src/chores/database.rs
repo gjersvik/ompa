@@ -1,4 +1,4 @@
-use super::messages::{Chore, Chores, LoadChores};
+use super::messages::{Chore, Chores, LoadChores, UpdateTime};
 use actix::{Actor, Handler, SyncContext};
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use native_tls::TlsConnector;
@@ -110,6 +110,16 @@ impl Handler<LoadChores> for Database {
             Chores(chores)
         } else {
             return Default::default();
+        }
+    }
+}
+
+impl Handler<UpdateTime> for Database {
+    type Result = ();
+
+    fn handle(&mut self, msg: UpdateTime, _: &mut Self::Context) {
+        if let Some(conn) = &self.conn {
+            conn.execute("UPDATE chores SET last_done = $1 WHERE id = $2", &[&msg.1.naive_utc(), &msg.0]).unwrap();
         }
     }
 }
