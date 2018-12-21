@@ -90,8 +90,9 @@ fn chores_to_actions(chores: &HashMap<i32, Chore>) -> Vec<Action> {
     chores
         .values()
         .filter_map(|chore| {
-            let mut action_type = ActionType::Task(Priority::Important);
+            let mut action_type = ActionType::Task(Priority::Useful);
             if let Some(last) = chore.last_done {
+                action_type = ActionType::Task(Priority::Important);
                 if last + chore.frequency > now {
                     return None;
                 }
