@@ -1,6 +1,7 @@
 #![deny(clippy::all)]
 
 mod chores;
+mod entertainment;
 mod logger;
 mod ole_martin;
 
@@ -57,6 +58,7 @@ pub fn start(config: Config) {
     )
     .start();
     let _log = Logger::addr();
+    entertainment::send(&OleMartin::addr().recipient());
 
     let auth = Auth::new(config.web_password);
 
