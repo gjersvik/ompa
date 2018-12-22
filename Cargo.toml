@@ -17,3 +17,4 @@ actix-web-httpauth = "0.1.0"
 dotenv = "0.13.0"
 postgres = {version = "0.15.2", features  = ["with-native-tls", "with-chrono"]}
 native-tls = "0.2.2"
+rand = "0.6.1"
