@@ -11,7 +11,10 @@ use actix::{
     Actor, Addr, AsyncContext, Context, Recipient, SyncArbiter,Handler,
 };
 use futures::future::Future;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::Duration,
+};
 use chrono::Utc;
 
 pub struct Chores {
@@ -34,6 +37,13 @@ impl Chores {
             data_store: SyncArbiter::start(1, move || Database::new(db_uri.clone())),
         }
     }
+
+    fn update(&mut self, _: &mut Context<Self>){
+        self.update_action.do_send(UpdateActions {
+            name: name(),
+            actions: chores_to_actions(&self.chores),
+        }).unwrap_or_default();
+    }
 }
 
 impl Actor for Chores {
@@ -42,27 +52,23 @@ impl Actor for Chores {
     fn started(&mut self, ctx: &mut Context<Self>) {
         let load = self.data_store.send(LoadChores).map_err(|_| {});
 
-        let update_self = wrap_future::<_, Self>(load).map(|chores, actor, _| {
+        let update_self = wrap_future::<_, Self>(load).map(|chores, actor, ctx| {
             actor.chores = chores.0;
-            actor
-                .update_action
-                .do_send(UpdateActions {
-                    name: name(),
-                    actions: chores_to_actions(&actor.chores),
-                })
-                .unwrap_or_default();
+            actor.update(ctx);
         });
 
         ctx.spawn(update_self);
 
         self.completed_sub.do_send(CompletedSub(ctx.address().recipient(), Some(name()))).unwrap_or_default();
+
+        ctx.run_interval(Duration::from_secs(5*60), Self::update);
     }
 }
 
 impl Handler<Completed> for Chores {
     type Result = ();
 
-    fn handle(&mut self, msg: Completed, _: &mut Self::Context) {
+    fn handle(&mut self, msg: Completed, ctx: &mut Self::Context) {
         let id = msg.action.index as i32;
         let time = msg.completed;
 
@@ -73,10 +79,7 @@ impl Handler<Completed> for Chores {
         }
 
         // send actions
-        self.update_action.do_send(UpdateActions {
-            name: name(),
-            actions: chores_to_actions(&self.chores),
-        }).unwrap_or_default();
+        self.update(ctx);
 
         // update database
         self.data_store.do_send(UpdateTime(id, time));
@@ -98,6 +101,9 @@ fn chores_to_actions(chores: &HashMap<i32, Chore>) -> Vec<Action> {
                 }
                 if last + (chore.frequency * 2) < now {
                     action_type = ActionType::Task(Priority::VeryImportant);
+                }
+                if last + (chore.frequency * 4) < now {
+                    action_type = ActionType::Task(Priority::Critical);
                 }
             }
 
