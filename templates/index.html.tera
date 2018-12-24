@@ -52,17 +52,18 @@
     </header>
     <main class="mdl-layout__content">
       {%if active %}
-      <div class="mdl-card mdl-shadow--4dp">
+      <div class="mdl-card mdl-shadow--4dp" style="width: 100%; min-height: 0">
         <div class="mdl-card__title {{active.css}}">
           <h2 class="mdl-card__title-text mdl-card--expand">{{active.name}}</h2>
         </div>
-        <form class="mdl-card__actions mdl-card--border" action="stop" method="post">
+        <form class="mdl-card__actions mdl-card--border" style="display: flex" action="stop" method="post">
           <button type="submit" name="done" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Done</button>
+          <div class="mdl-layout-spacer"></div>
           <button type="submit" name="cancel" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
         </form>
       </div>
       {% endif %}
-      <ul class="mdl-list">
+      <ul class="mdl-list" style="padding: 0; margin: 0">
         {% for action in actions -%}
         <li class="mdl-list__item {{action.css}}">
           <span class="mdl-list__item-primary-content">{{action.name}}</span>
