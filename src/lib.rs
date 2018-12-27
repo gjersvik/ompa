@@ -52,7 +52,7 @@ pub struct Config {
 
 pub fn start(config: Config) {
     let sys = System::new("ompa");
-    todoist::todoist(&config.todoist_token);
+    todoist::todoist(config.todoist_token);
 
     let _chore = Chores::new(
         config.postgresql_uri,
