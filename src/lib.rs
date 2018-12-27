@@ -4,6 +4,7 @@ mod chores;
 mod entertainment;
 mod logger;
 mod ole_martin;
+mod todoist;
 
 use actix::{Actor, System};
 use actix_web::{
@@ -46,10 +47,12 @@ pub struct Config {
     pub bind_port: String,
     pub web_password: String,
     pub postgresql_uri: String,
+    pub todoist_token: String,
 }
 
 pub fn start(config: Config) {
     let sys = System::new("ompa");
+    todoist::todoist(&config.todoist_token);
 
     let _chore = Chores::new(
         config.postgresql_uri,

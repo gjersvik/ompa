@@ -5,7 +5,7 @@ authors = ["Ole Martin Gjersvik <olem@olem.org>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "0.7.16"
+actix-web = "0.7.17"
 actix = "0.7.9"
 futures = "0.1.25"
 tera = "0.11.20"
@@ -18,3 +18,4 @@ dotenv = "0.13.0"
 postgres = {version = "0.15.2", features  = ["with-native-tls", "with-chrono"]}
 native-tls = "0.2.2"
 rand = "0.6.1"
+todoist = "0.1.0"
