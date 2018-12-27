@@ -105,16 +105,16 @@ fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
                 return None;
             }
 
-            let today = Utc::today().and_hms(0, 0, 0);
+            let now = Utc::now();
             let date = item
                 .due_date_utc
                 .clone()
-                .map(|d| d.timestamp.with_timezone(&Utc));
+                .map(|d| d.timestamp.with_timezone(&Utc) - chrono::Duration::days(1));
 
             let priority = match item.priority {
                 1 => match date {
                     Some(date) => {
-                        if date < today {
+                        if date <= now {
                             Priority::Useful
                         } else {
                             Priority::NiceToHave
@@ -124,7 +124,7 @@ fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
                 },
                 2 => match date {
                     Some(date) => {
-                        if date <= today {
+                        if date <= now {
                             Priority::Important
                         } else {
                             Priority::Useful
@@ -134,7 +134,7 @@ fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
                 },
                 3 => match date {
                     Some(date) => {
-                        if date <= today {
+                        if date <= now {
                             Priority::VeryImportant
                         } else {
                             Priority::Important
@@ -144,7 +144,7 @@ fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
                 },
                 _ => match date {
                     Some(date) => {
-                        if date <= today {
+                        if date <= now {
                             Priority::Critical
                         } else {
                             Priority::VeryImportant
