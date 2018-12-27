@@ -13,9 +13,11 @@
         "ompa",
         "postgres",
         "postgresql",
+        "reqwest",
         "serde",
         "stylesheet",
-        "todoist"
+        "todoist",
+        "uuid"
     ],
     "cSpell.enabledLanguageIds": [
         "asciidoc",

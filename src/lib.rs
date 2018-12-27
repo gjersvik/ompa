@@ -61,7 +61,12 @@ pub fn start(config: Config) {
     .start();
     let _log = Logger::addr();
     entertainment::send(&OleMartin::addr().recipient());
-    let _todoist = Todoist::new(config.todoist_token, OleMartin::addr().recipient()).start();
+    let _todoist = Todoist::new(
+        config.todoist_token,
+        OleMartin::addr().recipient(),
+        OleMartin::addr().recipient(),
+    )
+    .start();
 
     let auth = Auth::new(config.web_password);
 
