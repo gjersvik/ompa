@@ -44,3 +44,6 @@ pub struct Sync(pub Option<String>);
 impl Message for Sync {
     type Result = SyncResult;
 }
+
+#[derive(Message)]
+pub struct Complete(pub usize);
