@@ -1,3 +1,10 @@
+use todoist::{Client, ResourceType};
+
 pub fn todoist(token: &str){
-    println!("Todoist token: {}",token);
+    let mut client = Client::new(token);
+    let res = client.sync(&[ResourceType::Items]).unwrap();
+    let items = res.items.unwrap();
+    for item in items {
+        println!("{}", item.content.unwrap_or_default())
+    }
 }
