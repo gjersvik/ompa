@@ -16,6 +16,7 @@ use std::{
     collections::HashMap,
     time::Duration,
 };
+use chrono::Utc;
 
 pub struct Todoist{
     items: HashMap<usize, Item>,
@@ -67,15 +68,69 @@ impl Actor for Todoist {
 
 fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
     items.values().filter_map(|item| {
-        if item.checked == 0 {
-            Some(Action {
-                index: item.id,
-                name: item.content.clone().unwrap_or_default(),
-                action_type: ActionType::Task(Priority::JustForFun),
-            })
-        }else{
-            None
+        if item.checked == 1 {
+            return None
         }
+
+        let today = Utc::today().and_hms(0,0,0);
+        let date = item.due_date_utc.clone().map(|d| d.timestamp.with_timezone(&Utc));
+
+        let priority = match item.priority {
+            1 =>  {
+                match date {
+                    Some(date) => {
+                        if date < today {
+                            Priority::Useful
+                        }else {
+                            Priority::NiceToHave
+                        }
+                    }
+                    None => Priority::JustForFun,
+                }
+            },
+            2 =>{
+                match date {
+                    Some(date) => {
+                        if date <= today {
+                            Priority::Important
+                        }else {
+                            Priority::Useful
+                        }
+                    }
+                    None => Priority::NiceToHave,
+                }
+            },
+            3 =>{
+                match date {
+                    Some(date) => {
+                        if date <= today {
+                            Priority::VeryImportant
+                        }else {
+                            Priority::Important
+                        }
+                    }
+                    None => Priority::Useful,
+                }
+            },
+            _ =>{
+                match date {
+                    Some(date) => {
+                        if date <= today {
+                            Priority::Critical
+                        }else {
+                            Priority::VeryImportant
+                        }
+                    }
+                    None => Priority::Important,
+                }
+            },
+        };
+
+        Some(Action {
+            index: item.id,
+            name: item.content.clone().unwrap_or_default(),
+            action_type: ActionType::Task(priority),
+        })
     }).collect()
 }
 
