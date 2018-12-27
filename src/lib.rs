@@ -16,7 +16,7 @@ use actix_web_httpauth::extractors::{
     AuthenticationError,
 };
 
-use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin};
+use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin, todoist::Todoist};
 
 #[derive(Clone)]
 struct Auth {
@@ -52,7 +52,6 @@ pub struct Config {
 
 pub fn start(config: Config) {
     let sys = System::new("ompa");
-    todoist::todoist(config.todoist_token);
 
     let _chore = Chores::new(
         config.postgresql_uri,
@@ -62,6 +61,7 @@ pub fn start(config: Config) {
     .start();
     let _log = Logger::addr();
     entertainment::send(&OleMartin::addr().recipient());
+    let _todoist = Todoist::new(config.todoist_token, OleMartin::addr().recipient()).start();
 
     let auth = Auth::new(config.web_password);
 
