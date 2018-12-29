@@ -4,19 +4,19 @@ use actix::Recipient;
 pub fn send(addr: &Recipient<UpdateActions>){
     let mut actions = Vec::new();
 
-    actions.push(create_action("Watch Netflix"));
-    actions.push(create_action("Play PS4"));
-    actions.push(create_action("Watch Movie"));
-    actions.push(create_action("YouTube and TM"));
-    actions.push(create_action("YouTube and Idle"));
-    actions.push(create_action("Play pc games"));
+    actions.push(create_action(0,"Watch Netflix"));
+    actions.push(create_action(1,"Play PS4"));
+    actions.push(create_action(2,"Watch Movie"));
+    actions.push(create_action(3,"YouTube and TM"));
+    actions.push(create_action(4,"YouTube and Idle"));
+    actions.push(create_action(5,"Play pc games"));
 
     addr.do_send(UpdateActions{name: "entertainment".to_string() ,actions}).unwrap_or_default();
 }
 
-fn create_action(name: &str)-> Action{
+fn create_action(index: usize, name: &str,)-> Action{
     Action {
-        index: 0,
+        index,
         name: name.to_string(),
         action_type: ActionType::Entertainment,
     }
