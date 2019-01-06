@@ -4,7 +4,7 @@ mod chores;
 mod entertainment;
 mod logger;
 mod ole_martin;
-mod todoist;
+mod service;
 
 use actix::{Actor, System};
 use actix_web::{
@@ -16,7 +16,7 @@ use actix_web_httpauth::extractors::{
     AuthenticationError,
 };
 
-use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin, todoist::Todoist};
+use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin, service::Todoist};
 
 #[derive(Clone)]
 struct Auth {
