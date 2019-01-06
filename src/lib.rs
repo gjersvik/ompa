@@ -4,6 +4,7 @@ mod chores;
 mod entertainment;
 mod logger;
 mod ole_martin;
+mod personal;
 mod service;
 
 use actix::{Actor, System};
@@ -16,7 +17,10 @@ use actix_web_httpauth::extractors::{
     AuthenticationError,
 };
 
-use crate::{chores::Chores, logger::Logger, ole_martin::OleMartin, service::Todoist};
+use crate::{
+    chores::Chores, logger::Logger, ole_martin::OleMartin, personal::todoist::Todoist,
+    service::todoist::Todoist as TodoistService,
+};
 
 #[derive(Clone)]
 struct Auth {
@@ -61,8 +65,10 @@ pub fn start(config: Config) {
     .start();
     let _log = Logger::addr();
     entertainment::send(&OleMartin::addr().recipient());
+    let todoist_service = TodoistService::new(config.todoist_token).start();
+
     let _todoist = Todoist::new(
-        config.todoist_token,
+        todoist_service,
         OleMartin::addr().recipient(),
         OleMartin::addr().recipient(),
     )

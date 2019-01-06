@@ -19,6 +19,8 @@ dotenv = "0.13.0"
 postgres = {version = "0.15.2", features  = ["with-native-tls", "with-chrono"]}
 native-tls = "0.2.2"
 rand = "0.6.1"
+im = "12.2.0"
+
 todoist = "0.1.0"
 uuid = {version = "0.6.5", features = ["v4", "serde"] }
 reqwest = "0.8.8"

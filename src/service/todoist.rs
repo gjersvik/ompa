@@ -1,37 +1,79 @@
 mod messages;
 mod service;
 
-use self::{messages::{Sync, Complete}, service::Service};
-use crate::ole_martin::{Action, ActionType, Completed, CompletedSub, Priority, UpdateActions};
+use self::{
+    messages::{Complete as SComplete, Sync},
+    service::Service,
+};
 use actix::{
     fut::{wrap_future, ActorFuture},
-    Actor, Addr, AsyncContext, Context, Handler, Recipient, SyncArbiter,
+    Actor, Addr, AsyncContext, Context, Handler, Message, Recipient, SyncArbiter,
 };
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use futures::future::Future;
-use std::{collections::HashMap, time::Duration};
-use todoist::{resource::Item, IntBool};
+use im::HashMap;
+use std::time::Duration;
+use todoist::resource::Item as SItem;
+
+#[derive(Message)]
+pub struct SubActiveItems(pub Recipient<Items>);
+
+#[derive(Message)]
+pub struct Items(pub HashMap<u64, Item>);
+
+#[derive(Clone)]
+pub struct Item {
+    pub id: u64,
+    pub content: String,
+    pub due_date_utc: Option<DateTime<Utc>>,
+    pub priority: Priority,
+}
+
+impl Item {
+    fn from_back_end(item: SItem) -> Item {
+        Item {
+            id: item.id as u64,
+            content: item.content.unwrap_or_default(),
+            due_date_utc: item.due_date_utc.map(|d| d.timestamp.with_timezone(&Utc)),
+            priority: Priority::from_back_end(item.priority),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum Priority {
+    P1, // Most important
+    P2,
+    P3,
+    P4, // Least important
+}
+
+impl Priority {
+    fn from_back_end(p: u8) -> Priority {
+        match p {
+            4 => Priority::P1,
+            3 => Priority::P2,
+            2 => Priority::P3,
+            _ => Priority::P4,
+        }
+    }
+}
+
+#[derive(Message)]
+pub struct Complete(pub u64);
 
 pub struct Todoist {
-    items: HashMap<usize, Item>,
-    sync_token: Option<String>,
+    items: HashMap<u64, Item>,
     service: Addr<Service>,
-    update_action: Recipient<UpdateActions>,
-    completed_sub: Recipient<CompletedSub>,
+    subs: Vec<Recipient<Items>>,
 }
 
 impl Todoist {
-    pub fn new(
-        token: String,
-        update_action: Recipient<UpdateActions>,
-        completed_sub: Recipient<CompletedSub>,
-    ) -> Todoist {
+    pub fn new(token: String) -> Todoist {
         Todoist {
             items: HashMap::new(),
-            sync_token: None,
             service: SyncArbiter::start(1, move || Service::new(token.clone())),
-            update_action,
-            completed_sub,
+            subs: Vec::new(),
         }
     }
 
@@ -39,27 +81,40 @@ impl Todoist {
         let load = self.service.send(Sync(None)).map_err(|_| {});
 
         let update_self = wrap_future::<_, Self>(load).map(|res, actor, _| {
-            actor.sync_token = res.sync_token;
             if res.items.is_empty() {
                 return;
             }
-            for item in res.items {
-                actor.items.insert(item.id, item);
-            }
+            actor.set_times(res.items);
             actor.send_actions();
         });
 
         ctx.spawn(update_self);
     }
 
-    fn send_actions(&self){
-        self
-            .update_action
-            .do_send(UpdateActions {
-                name: name(),
-                actions: items_to_actions(&self.items),
-            })
-            .unwrap_or_default();
+    fn set_times(&mut self, items: Vec<SItem>) {
+        self.items = HashMap::new();
+
+        for item in items {
+            if item.checked == 1 {
+                continue;
+            }
+            if item.is_deleted == 1 {
+                continue;
+            }
+            if item.is_archived == 1 {
+                continue;
+            }
+
+            let new_item = Item::from_back_end(item);
+
+            self.items.insert(new_item.id, new_item);
+        }
+    }
+
+    fn send_actions(&self) {
+        for sub in &self.subs {
+            sub.do_send(Items(self.items.clone())).unwrap_or_default();
+        }
     }
 }
 
@@ -68,101 +123,28 @@ impl Actor for Todoist {
 
     fn started(&mut self, ctx: &mut Context<Self>) {
         self.update(ctx);
-
-        self.completed_sub.do_send(CompletedSub(ctx.address().recipient(), Some(name()))).unwrap_or_default();
-
         ctx.run_interval(Duration::from_secs(5 * 60), Self::update);
     }
 }
 
-impl Handler<Completed> for Todoist {
+impl Handler<SubActiveItems> for Todoist {
     type Result = ();
 
-    fn handle(&mut self, msg: Completed, ctx: &mut Self::Context) {
-        let id = msg.action.index;
-        // update local 
-        if let Some(item) = self.items.get_mut(&id){
-            item.checked = IntBool::from(true);
-        } else {
-            return;
-        }
-        self.send_actions();
+    fn handle(&mut self, msg: SubActiveItems, _: &mut Self::Context) {
+        msg.0.do_send(Items(self.items.clone())).unwrap_or_default();
+        self.subs.push(msg.0);
+    }
+}
 
+impl Handler<Complete> for Todoist {
+    type Result = ();
+
+    fn handle(&mut self, msg: Complete, ctx: &mut Self::Context) {
         // update and sync with service.
-        let update = self.service.send(Complete(id)).map_err(|_| {});
+        let update = self.service.send(SComplete(msg.0 as usize)).map_err(|_| {});
         let update_self = wrap_future::<_, Self>(update).map(|_, actor, ctx| {
             actor.update(ctx);
         });
         ctx.spawn(update_self);
     }
-}
-
-fn items_to_actions(items: &HashMap<usize, Item>) -> Vec<Action> {
-    items
-        .values()
-        .filter_map(|item| {
-            if item.checked == 1 {
-                return None;
-            }
-
-            let now = Utc::now();
-            let date = item
-                .due_date_utc
-                .clone()
-                .map(|d| d.timestamp.with_timezone(&Utc) - chrono::Duration::days(1));
-
-            let priority = match item.priority {
-                1 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Useful
-                        } else {
-                            Priority::NiceToHave
-                        }
-                    }
-                    None => Priority::JustForFun,
-                },
-                2 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Important
-                        } else {
-                            Priority::Useful
-                        }
-                    }
-                    None => Priority::NiceToHave,
-                },
-                3 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::VeryImportant
-                        } else {
-                            Priority::Important
-                        }
-                    }
-                    None => Priority::Useful,
-                },
-                _ => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Critical
-                        } else {
-                            Priority::VeryImportant
-                        }
-                    }
-                    None => Priority::Important,
-                },
-            };
-
-            Some(Action {
-                index: item.id,
-                name: item.content.clone().unwrap_or_default(),
-                action_type: ActionType::Task(priority),
-            })
-        })
-        .collect()
-}
-
-fn name() -> String {
-    "todoist".to_string()
 }
