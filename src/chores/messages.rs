@@ -7,14 +7,14 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Chore {
-    pub id: i32,
+    pub id: u64,
     pub name: String,
     pub frequency: Duration,
     pub last_done: Option<DateTime<Utc>>,
 }
 
 #[derive(Clone, Default)]
-pub struct Chores(pub HashMap<i32, Chore>);
+pub struct Chores(pub HashMap<u64, Chore>);
 
 impl<A, M> MessageResponse<A, M> for Chores
 where
@@ -35,4 +35,4 @@ impl Message for LoadChores {
 }
 
 #[derive(Message)]
-pub struct UpdateTime(pub i32, pub DateTime<Utc>);
+pub struct UpdateTime(pub u64, pub DateTime<Utc>);

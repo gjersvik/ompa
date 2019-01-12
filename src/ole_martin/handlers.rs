@@ -28,7 +28,7 @@ fn index(_req: &HttpRequest) -> Box<Future<Item = HttpResponse, Error = Error>> 
 
 #[derive(Deserialize)]
 struct StartForm {
-    id: usize,
+    id: u64,
     source: String,
 }
 

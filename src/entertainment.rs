@@ -14,7 +14,7 @@ pub fn send(addr: &Recipient<UpdateActions>){
     addr.do_send(UpdateActions{name: "entertainment".to_string() ,actions}).unwrap_or_default();
 }
 
-fn create_action(index: usize, name: &str,)-> Action{
+fn create_action(index: u64, name: &str,)-> Action{
     Action {
         index,
         name: name.to_string(),

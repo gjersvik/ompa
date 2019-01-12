@@ -124,7 +124,7 @@ fn items_to_actions(items: &HashMap<u64, Item>, now: DateTime<Utc>) -> Vec<Actio
             };
 
             Action {
-                index: item.id as usize,
+                index: item.id,
                 name: item.content.clone(),
                 action_type: ActionType::Task(priority),
             }

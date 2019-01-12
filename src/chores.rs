@@ -18,7 +18,7 @@ use std::{
 use chrono::Utc;
 
 pub struct Chores {
-    chores: HashMap<i32, Chore>,
+    chores: HashMap<u64, Chore>,
     update_action: Recipient<UpdateActions>,
     completed_sub: Recipient<CompletedSub>,
     data_store: Addr<Database>,
@@ -69,7 +69,7 @@ impl Handler<Completed> for Chores {
     type Result = ();
 
     fn handle(&mut self, msg: Completed, ctx: &mut Self::Context) {
-        let id = msg.action.index as i32;
+        let id = msg.action.index;
         let time = msg.completed;
 
         // update local
@@ -87,7 +87,7 @@ impl Handler<Completed> for Chores {
 }
 
 
-fn chores_to_actions(chores: &HashMap<i32, Chore>) -> Vec<Action> {
+fn chores_to_actions(chores: &HashMap<u64, Chore>) -> Vec<Action> {
     let now = Utc::now();
     
     chores
@@ -108,7 +108,7 @@ fn chores_to_actions(chores: &HashMap<i32, Chore>) -> Vec<Action> {
             }
 
             Some(Action {
-                index: chore.id as usize,
+                index: chore.id,
                 name: chore.name.clone(),
                 action_type,
             })

@@ -23,7 +23,7 @@ pub struct Completed {
 
 #[derive(Clone)]
 pub struct Action {
-    pub index: usize,
+    pub index: u64,
     pub name: String,
     pub action_type: ActionType,
 }
@@ -81,7 +81,7 @@ where
     }
 }
 
-pub struct GetAction(pub String, pub usize);
+pub struct GetAction(pub String, pub u64);
 
 impl Message for GetAction {
     type Result = Option<InternalAction>;
@@ -95,7 +95,7 @@ impl Message for GetActions {
 
 #[derive(Clone)]
 pub struct InternalAction {
-    pub index: usize,
+    pub index: u64,
     pub name: String,
     pub action_type: ActionType,
     pub source: String,

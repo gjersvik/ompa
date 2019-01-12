@@ -95,7 +95,7 @@ impl Handler<LoadChores> for Database {
         if let Some(conn) = &self.conn {
             let mut chores = HashMap::new();
             for row in &conn.query("SELECT id, name, EXTRACT(EPOCH FROM frequency) AS frequency, last_done FROM public.chores", &[]).unwrap() {
-                let id: i32 = row.get(0);
+                let id: u64 = row.get::<_, i32>(0) as u64;
                 let name: String = row.get(1);
                 let frequency:f64 = row.get(2);
                 let last_done: Option<NaiveDateTime> = row.get(3);
@@ -119,7 +119,7 @@ impl Handler<UpdateTime> for Database {
 
     fn handle(&mut self, msg: UpdateTime, _: &mut Self::Context) {
         if let Some(conn) = &self.conn {
-            conn.execute("UPDATE chores SET last_done = $1 WHERE id = $2", &[&msg.1.naive_utc(), &msg.0]).unwrap();
+            conn.execute("UPDATE chores SET last_done = $1 WHERE id = $2", &[&msg.1.naive_utc(), &(msg.0 as i32)]).unwrap();
         }
     }
 }
