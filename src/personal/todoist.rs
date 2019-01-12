@@ -34,7 +34,7 @@ impl Todoist {
         self.update_action
             .do_send(UpdateActions {
                 name: NAME.to_string(),
-                actions: items_to_actions(&self.items, Utc::now()),
+                actions: items_to_actions(&self.items, &Utc::now()),
             })
             .unwrap_or_default();
     }
@@ -74,65 +74,111 @@ impl Handler<Completed> for Todoist {
 
 const NAME: &str = "todoist";
 
-fn items_to_actions(items: &HashMap<u64, Item>, now: DateTime<Utc>) -> Vec<Action> {
+impl Item {
+    fn to_action(&self, now: &DateTime<Utc>) -> Action{
+        Action {
+            index: self.id,
+            name: self.content.clone(),
+            action_type: ActionType::Task(self.get_action_priority(now)),
+        }
+    }
+
+    fn get_action_priority(&self, now: &DateTime<Utc>) -> Priority{
+        let date = self.due_date_utc.map(|d| d - Duration::days(1));
+
+        match &self.priority {
+            TodoistPriority::P4 => match date {
+                Some(date) => {
+                    if date <= *now {
+                        Priority::Useful
+                    } else {
+                        Priority::NiceToHave
+                    }
+                }
+                None => Priority::JustForFun,
+            },
+            TodoistPriority::P3 => match date {
+                Some(date) => {
+                    if date <= *now {
+                        Priority::Important
+                    } else {
+                        Priority::Useful
+                    }
+                }
+                None => Priority::NiceToHave,
+            },
+            TodoistPriority::P2 => match date {
+                Some(date) => {
+                    if date <= *now {
+                        Priority::VeryImportant
+                    } else {
+                        Priority::Important
+                    }
+                }
+                None => Priority::Useful,
+            },
+            TodoistPriority::P1 => match date {
+                Some(date) => {
+                    if date <= *now {
+                        Priority::Critical
+                    } else {
+                        Priority::VeryImportant
+                    }
+                }
+                None => Priority::Important,
+            },
+        }
+    }
+}
+
+fn items_to_actions(items: &HashMap<u64, Item>, now: &DateTime<Utc>) -> Vec<Action> {
     items
         .values()
-        .map(|item| {
-            let date = item.due_date_utc.map(|d| d - Duration::days(1));
-
-            let priority = match &item.priority {
-                TodoistPriority::P4 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Useful
-                        } else {
-                            Priority::NiceToHave
-                        }
-                    }
-                    None => Priority::JustForFun,
-                },
-                TodoistPriority::P3 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Important
-                        } else {
-                            Priority::Useful
-                        }
-                    }
-                    None => Priority::NiceToHave,
-                },
-                TodoistPriority::P2 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::VeryImportant
-                        } else {
-                            Priority::Important
-                        }
-                    }
-                    None => Priority::Useful,
-                },
-                TodoistPriority::P1 => match date {
-                    Some(date) => {
-                        if date <= now {
-                            Priority::Critical
-                        } else {
-                            Priority::VeryImportant
-                        }
-                    }
-                    None => Priority::Important,
-                },
-            };
-
-            Action {
-                index: item.id,
-                name: item.content.clone(),
-                action_type: ActionType::Task(priority),
-            }
-        })
+        .map(|item| item.to_action(now))
         .collect()
 }
 
 #[cfg(test)]
 mod tests {
-    
+    use super::*;
+
+    use chrono::offset::TimeZone;
+
+    fn test_priority(pri: TodoistPriority) -> Option<Priority>{
+        let item = Item{
+            id:0,
+            content: "test".to_string(),
+            due_date_utc: None,
+            priority: pri,
+        };
+
+        let now = Utc.ymd(2010,1,1).and_hms(0,0,0);
+
+        if let ActionType::Task(pri) = item.to_action(&now).action_type {
+            Some(pri)
+        } else {
+            None
+        }
+    }
+
+    #[test]
+    fn item_get_action_priority_p1() {
+        assert_eq!(test_priority(TodoistPriority::P1).unwrap(), Priority::Important);
+    }
+
+    #[test]
+    fn item_get_action_priority_p2() {
+        assert_eq!(test_priority(TodoistPriority::P2).unwrap(), Priority::Useful);
+    }
+
+    #[test]
+    fn item_get_action_priority_p3() {
+        assert_eq!(test_priority(TodoistPriority::P3).unwrap(), Priority::NiceToHave);
+    }
+
+    #[test]
+    fn item_get_action_priority_p4() {
+        assert_eq!(test_priority(TodoistPriority::P4).unwrap(), Priority::JustForFun);
+    }
+
 }
