@@ -34,7 +34,7 @@ pub enum ActionType {
     Task(Priority),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Priority {
     /// If you feel like it no problem
     JustForFun,
@@ -50,6 +50,20 @@ pub enum Priority {
     Critical,
     /// Must be done NOW!!!
     Mandatory,
+}
+
+impl Priority{
+    pub fn more_if_possible(&self) -> Priority{
+        match self {
+            Priority::JustForFun =>  Priority::NiceToHave,
+            Priority::NiceToHave =>  Priority::Useful,
+            Priority::Useful =>  Priority::Important,
+            Priority::Important =>  Priority::VeryImportant,
+            Priority::VeryImportant =>  Priority::Critical,
+            Priority::Critical =>  Priority::Mandatory,
+            Priority::Mandatory =>  Priority::Mandatory,
+        }
+    }
 }
 
 #[derive(Clone, Default)]
@@ -125,4 +139,37 @@ pub struct GetActive;
 
 impl Message for GetActive {
     type Result = Option<InternalAction>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn priority_more_if_possible_just_for_fun() {
+        assert_eq!(Priority::JustForFun.more_if_possible(), Priority::NiceToHave);
+    }
+    #[test]
+    fn priority_more_if_possible_nice_to_have() {
+        assert_eq!(Priority::NiceToHave.more_if_possible(), Priority::Useful);
+    }
+    #[test]
+    fn priority_more_if_possible_useful() {
+        assert_eq!(Priority::Useful.more_if_possible(), Priority::Important);
+    }
+    #[test]
+    fn priority_more_if_possible_important() {
+        assert_eq!(Priority::Important.more_if_possible(), Priority::VeryImportant);
+    }
+    #[test]
+    fn priority_more_if_possible_very_important() {
+        assert_eq!(Priority::VeryImportant.more_if_possible(), Priority::Critical);
+    }
+    #[test]
+    fn priority_more_if_possible_critical() {
+        assert_eq!(Priority::Critical.more_if_possible(), Priority::Mandatory);
+    }
+    #[test]
+    fn priority_more_if_possible_mandatory() {
+        assert_eq!(Priority::Mandatory.more_if_possible(), Priority::Mandatory);
+    }
 }

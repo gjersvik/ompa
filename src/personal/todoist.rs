@@ -6,7 +6,7 @@ use crate::{
     },
 };
 use actix::{Actor, Addr, AsyncContext, Context, Handler, Recipient};
-use chrono::{Duration, Utc};
+use chrono::{Duration, Utc, DateTime};
 use im::HashMap;
 
 pub struct Todoist {
@@ -33,8 +33,8 @@ impl Todoist {
     fn send_actions(&self) {
         self.update_action
             .do_send(UpdateActions {
-                name: name(),
-                actions: items_to_actions(&self.items),
+                name: NAME.to_string(),
+                actions: items_to_actions(&self.items, Utc::now()),
             })
             .unwrap_or_default();
     }
@@ -45,7 +45,7 @@ impl Actor for Todoist {
 
     fn started(&mut self, ctx: &mut Context<Self>) {
         self.completed_sub
-            .do_send(CompletedSub(ctx.address().recipient(), Some(name())))
+            .do_send(CompletedSub(ctx.address().recipient(), Some(NAME.to_string())))
             .unwrap_or_default();
         self.service
             .do_send(SubActiveItems(ctx.address().recipient()));
@@ -72,11 +72,12 @@ impl Handler<Completed> for Todoist {
     }
 }
 
-fn items_to_actions(items: &HashMap<u64, Item>) -> Vec<Action> {
+const NAME: &str = "todoist";
+
+fn items_to_actions(items: &HashMap<u64, Item>, now: DateTime<Utc>) -> Vec<Action> {
     items
         .values()
         .map(|item| {
-            let now = Utc::now();
             let date = item.due_date_utc.map(|d| d - Duration::days(1));
 
             let priority = match &item.priority {
@@ -131,6 +132,7 @@ fn items_to_actions(items: &HashMap<u64, Item>) -> Vec<Action> {
         .collect()
 }
 
-fn name() -> String {
-    "todoist".to_string()
+#[cfg(test)]
+mod tests {
+    
 }
