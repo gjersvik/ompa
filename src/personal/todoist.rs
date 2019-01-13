@@ -84,50 +84,21 @@ impl Item {
     }
 
     fn get_action_priority(&self, now: &DateTime<Utc>) -> Priority{
-        let date = self.due_date_utc.map(|d| d - Duration::days(1));
+        let mut priority = match &self.priority {
+            TodoistPriority::P4 => Priority::JustForFun,
+            TodoistPriority::P3 => Priority::NiceToHave,
+            TodoistPriority::P2 => Priority::Useful,
+            TodoistPriority::P1 => Priority::Important,
+        };
 
-        match &self.priority {
-            TodoistPriority::P4 => match date {
-                Some(date) => {
-                    if date <= *now {
-                        Priority::Useful
-                    } else {
-                        Priority::NiceToHave
-                    }
-                }
-                None => Priority::JustForFun,
-            },
-            TodoistPriority::P3 => match date {
-                Some(date) => {
-                    if date <= *now {
-                        Priority::Important
-                    } else {
-                        Priority::Useful
-                    }
-                }
-                None => Priority::NiceToHave,
-            },
-            TodoistPriority::P2 => match date {
-                Some(date) => {
-                    if date <= *now {
-                        Priority::VeryImportant
-                    } else {
-                        Priority::Important
-                    }
-                }
-                None => Priority::Useful,
-            },
-            TodoistPriority::P1 => match date {
-                Some(date) => {
-                    if date <= *now {
-                        Priority::Critical
-                    } else {
-                        Priority::VeryImportant
-                    }
-                }
-                None => Priority::Important,
-            },
+        if let Some(date) = self.due_date_utc {
+            priority = priority.more_if_possible();
+            if date <= *now + Duration::days(1) {
+                priority = priority.more_if_possible();
+            }
         }
+
+        priority
     }
 }
 
