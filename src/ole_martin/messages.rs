@@ -21,14 +21,14 @@ pub struct Completed {
     pub action: Action,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Action {
     pub index: u64,
     pub name: String,
     pub action_type: ActionType,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ActionType {
     Entertainment,
     Task(Priority),

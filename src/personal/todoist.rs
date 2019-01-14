@@ -74,6 +74,13 @@ impl Handler<Completed> for Todoist {
 
 const NAME: &str = "todoist";
 
+fn items_to_actions(items: &HashMap<u64, Item>, now: &DateTime<Utc>) -> Vec<Action> {
+    items
+        .values()
+        .map(|item| item.to_action(now))
+        .collect()
+}
+
 impl Item {
     fn to_action(&self, now: &DateTime<Utc>) -> Action{
         Action {
@@ -102,13 +109,6 @@ impl Item {
     }
 }
 
-fn items_to_actions(items: &HashMap<u64, Item>, now: &DateTime<Utc>) -> Vec<Action> {
-    items
-        .values()
-        .map(|item| item.to_action(now))
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -118,6 +118,36 @@ mod tests {
 
     lazy_static! {
         static ref NOW:DateTime<Utc> = Utc.ymd(2010,1,1).and_hms(0,0,0);
+    }
+
+    fn test_item() -> Item {
+        Item{
+            id:0,
+            content: "test".to_string(),
+            due_date_utc: None,
+            priority: TodoistPriority::P1,
+        }
+    }
+
+    fn test_action() -> Action {
+        Action{
+            index: 0,
+            name: "test".to_string(),
+            action_type: ActionType::Task(Priority::Important), 
+        }
+    }
+
+    #[test]
+    fn items_to_actions_simple() {
+        let mut items = HashMap::new();
+        items.insert(0, test_item());
+        let actions = vec![test_action()];
+        assert_eq!(items_to_actions(&items, &NOW), actions);
+    }
+
+    #[test]
+    fn item_to_action() {
+        assert_eq!(test_item().to_action(&NOW), test_action());
     }
 
     fn test_priority(pri: TodoistPriority) -> Priority{
@@ -140,11 +170,7 @@ mod tests {
             priority: pri,
         };
 
-        if let ActionType::Task(pri) = item.to_action(&NOW).action_type {
-            Some(pri)
-        } else {
-            None
-        }.unwrap()
+        item.get_action_priority(&NOW)
     }
 
     #[test]
